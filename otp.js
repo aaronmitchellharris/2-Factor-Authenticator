@@ -1,9 +1,12 @@
 const crypto = require('crypto')
 
+
+// create new secret
 const createSecret = () => {
     return crypto.randomBytes(20).toString('hex');
 }
 
+// create authentication code given a secret and counter
 const createAuth = (secret, counter) => {
     const hash = crypto.createHmac('sha256', secret);
     hash.update(String(counter))
@@ -14,6 +17,7 @@ const createAuth = (secret, counter) => {
     return num
 }
 
-const key = createSecret()
-
-console.log(createAuth(key, 4))
+module.exports = {
+    createSecret,
+    createAuth
+};
