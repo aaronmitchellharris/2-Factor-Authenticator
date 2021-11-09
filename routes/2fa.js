@@ -34,6 +34,45 @@ router.post('/', (req, res) => {
     })
 });
 
+router.get('/:account_id', (req, res) => {
+
+    const account_id = parseInt(req.params.account_id, 10);
+    const accepts = req.accepts('json');
+
+    if (accepts == false) {
+        res.status(406).send({"Error": "Cannot send accepted media type"});
+    } else {
+
+        model.read('Account', account_id).then(account => {
+            if (account == null) {
+                res.status(404).send({"Error": "No account with this account_id exists"});
+            } else {
+                const response = {
+                    "account_id": account_id,
+                    "email": account.email
+                };
+                res.status(200).json(response);
+            }
+        })
+    }
+});
+
+router.delete('/:account_id', (req, res) => {
+
+    const account_id = parseInt(req.params.account_id, 10);
+
+    model.read('Account', account_id).then(account => {
+
+        if (account == null) {
+            res.status(404).send({"Error": "No account with this account_id exists"});
+        } else {
+            model.delete('Account', account_id).then(() => {
+                res.status(204).send();
+            })
+        }
+    });
+});
+
 router.post('/flow', (req, res) => {
 
     v.validateFlowRequest(req).then(validate => {
