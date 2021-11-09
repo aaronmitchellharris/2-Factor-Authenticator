@@ -88,9 +88,25 @@ router.put('/flow/:flow_id', (req, res) => {
 
                 if (flow == null) {
                     res.status(404).send({"Error": "No flow with this flow_id exists"})
-                }
+                } else {
 
-                
+                    const response = {
+                        "flow_id": flow_id,
+                        "account_id": flow.account_id,
+                        "authenticated": false
+                    };
+
+                    if (req.body.code != flow.code) { 
+                        res.status(200).json(response);
+                    } else {
+                        response.authenticated = true;
+
+                        model.delete('Flow', flow_id).then(() => {
+
+                            res.status(200).json(response);
+                        })
+                    }
+                }
 
             })
         }
