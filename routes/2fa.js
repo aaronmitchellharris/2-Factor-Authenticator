@@ -1,6 +1,6 @@
 const express = require('express');
 const model = require('../models');
-const v = require('..validate');
+const v = require('../validate');
 const m = require('../mail');
 const otp = require('../otp');
 
@@ -23,7 +23,6 @@ router.post('/', (req, res) => {
             model.create('Account', data).then(key => {
                 const account_id = parseInt(key.id)
                 const response = {
-                    "secret": data.secret,
                     "email": data.email,
                     "account_id": account_id
                 };
@@ -86,20 +85,29 @@ router.post('/flow', (req, res) => {
                 if (account == null) {
                     res.status(404).send({"Error": "No account with this account_id exists"})
                 } else {
+                    console.log('account: ', account)
+                    console.log('creating code...')
                     const code = otp.createAuth(account.secret, account.counter);
 
-                    m.sendEmail(account.email, code);
+                    req.body.code = code;
+
+                    console.log('sending email...')
+                    m.sendEmail(account.email, code)
 
                     account.counter += 1
+                    console.log('req.body.account_id: ', req.body.account_id)
+                    console.log('updating account...')
+                    model.update('Account', req.body.account_id, account).then(() => {
 
-                    model.update('Account', account.id, account).then(() => {
-
+                        console.log('creating flow...')
                         model.create('Flow', req.body).then(key => {
-                            const flow_id = parseInt(key.id);
+                            console.log('parsing flow_id...')
+                            const flow_id = parseInt(key.id, 10);
+
+                            console.log('constructing response...')
                             const response = {
                                 "account_id": req.body.account_id,
-                                "flow_id": flow_id,
-                                "code": code
+                                "flow_id": flow_id
                             }
                             res.status(201).json(response);
                         });

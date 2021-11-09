@@ -26,8 +26,6 @@ const sendEmail = (recipient, code) => {
     });
 };
 
-sendEmail('aaronmitchellharris@gmail.com', 123456);
-
 module.exports = {
     sendEmail
 };
